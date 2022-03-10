@@ -1,14 +1,13 @@
 import React from 'react';
 import calculateWinner from 'lib/rule';
 import '../sass/game.scss';
+import { useState } from 'react';
 
-type SquareProps = {
-  value?: string;
+const Square = (props: {
   // onClick: () => void も可
+  value?: string;
   onClick: React.MouseEventHandler;
-};
-
-const Square = (props: SquareProps): JSX.Element => {
+}): JSX.Element => {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -16,127 +15,102 @@ const Square = (props: SquareProps): JSX.Element => {
   );
 };
 
-type BoardProps = {
+const Board = (props: {
   squares: (string | undefined)[];
   onClick: (param: number) => void;
-};
+}): JSX.Element => {
+  const renderSquare = (i: number): JSX.Element => (
+    <Square
+      value={props.squares[i]}
+      onClick={() => props.onClick(i)}
+    />
+  );
 
-class Board extends React.Component<BoardProps> {
-  renderSquare(i: number) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+  return (
+    <div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
       </div>
-    );
-  }
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+    </div>
+  );
 }
 
-type GameState = {
-  history: {
-    squares: (string | undefined)[]
-  }[];
-  stepNumber: number;
-  xIsNext: boolean;
-}
+const Game = (): JSX.Element => {
+  const [history, setHistory] = useState([{
+    squares: Array(9).fill(null),
+  }]);
+  const [stepNumber, setStepNumber] = useState(0);
+  const [xIsNext, setXIsNext] = useState(true);
 
-class Game extends React.Component<{}, GameState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-      }],
-      stepNumber: 0,
-      xIsNext: true,
-    };
-  }
-
-  handleClick(i: number) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
+  const handleClick = (i: number): void => {
+    const real = history.slice(0, stepNumber + 1);
+    const current = real[real.length - 1];
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
 
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
-    this.setState({
-      history: history.concat([{
-        squares: squares,
-      }]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-    });
+    squares[i] = xIsNext ? 'X' : 'O';
+    setHistory(real.concat([{
+      squares: squares,
+    }]));
+    setStepNumber(real.length);
+    setXIsNext(!xIsNext);
   }
 
-  jupmTo(step: number) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0,
-    });
+  const jupmTo = (step: number): void => {
+    setStepNumber(step);
+    setXIsNext((step % 2) === 0);
   }
 
-  render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+  const real = history;
+  const current = real[stepNumber];
+  const winner = calculateWinner(current.squares);
 
-    const moves = history.map((_: object, move: number) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jupmTo(move)}>{desc}</button>
-        </li>
-      );
-    })
-
-    let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
-
+  const moves = real.map((_: object, move: number): JSX.Element => {
+    const desc = move ?
+      'Go to move #' + move :
+      'Go to game start';
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            squares={current.squares}
-            onClick={(i) => this.handleClick(i)}
-          />
-        </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <ol>{moves}</ol>
-        </div>
-      </div>
+      <li key={move}>
+        <button onClick={() => jupmTo(move)}>{desc}</button>
+      </li>
     );
+  })
+
+  let status: string;
+  if (winner) {
+    status = 'Winner: ' + winner;
+  } else {
+    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
-}
+
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board
+          squares={current.squares}
+          onClick={(i) => handleClick(i)}
+        />
+      </div>
+      <div className="game-info">
+        <div>{status}</div>
+        <ol>{moves}</ol>
+      </div>
+    </div>
+  );
+};
 
 export default Game;
