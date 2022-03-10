@@ -1,70 +1,64 @@
-# Getting Started with Create React App
+# React Template
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Component
 
-## Available Scripts
+* TypeScript
+* Recoil
+* SCSS
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## React Rule
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* JSXを複数行に渡って記述する際は括弧で括る
+  * ASIに引っかからないため
+* this.props と this.state を setState 内で同時に使用しない
+  * この2つの値は非同期に更新されるため
+  * setState((state, props) => {}) を使用する
+* リスト項目には key を与える
+  * key は取り囲まれる配列の要素に対して与える
+  * e.g.) ul > ListItem > li のような構造の場合は ListItem に対して key を与える
+* 関数型コンポーネントを利用する
+  * Hooks を始めとしてこちらの方がメインストリームみたい
+* コーディングをする際は UI → ロジック と実装を分けて行う
+  * UI の実装段階では state は決して使わない
+    * UI の実装は量が多いのに対して考えることは少ない
+    * ロジックの実装は量が少ないのに対して考えることが多い
+* children の型は `React.ReactNode` で定義するのがベスト
+* Hooks はループや条件分岐やネストされた関数内で呼び出してはいけない
+  * トップレベルで呼び出す
+  * `useState`, `useEffect` は記述した順番に処理がされる
+    * スキップされたりすると呼び出しの順番が変わってしまう可能性がある
+* Custom Hooks は `use` から名前を始めるようにする
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## TypeScript Rule
 
-### `npm test`
+* .tsx はコンポーネント、.ts はロジックを記述するように住み分けをする
+  * JS と違って .tsx を付与しないと JSX を利用することができない
+* オブジェクトの型注釈 (type) のプロパティの区切り文字には `;` を用いる
+  * コード整形ツール Prettier が `, → ;` に置換するため
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## React Memo
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* JS ではクラスのメソッドはデフォルトではバインドされない
+  * メソッドを直接渡すときは `this.method = this.method.bind(this);` でバインドする必要がある
+  * アロー関数で代用できるが、レンダーの度に異なるコールバック関数が作成されるので、パフォーマンスに注意する
+* JSX.Element vs React.FC vs React.VFC
+  * JSX.Element を採用するのが吉
+    * 型推論に頼っても良いが、明示する方針でいく
+      * 明示するとパフォーマンスが改善されうる
+      * TS を使ってるなら型宣言した方がメリットを享受できる
+  * FC (FunctionComponent) vs VFC (VoidFunctionComponent)
+    * props の型が PropsWithChildren なのが FC
+    * コンポーネントで子要素を用いるとき、VFC では props の型に明示的に children を追加する必要がある
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## TypeScript Memo
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* readonly でプロパティを読み取り専用にできる
+  * 再帰的ではないので孫のプロパティは書き換えられる
+  * 孫も同様に読み取り専用にした場合は、孫プロパティにも `readonly` を付与する必要がある
+* `typeof` の代わりに `instanceof` を用いることで `Object` 以上のチェックを行うことができる
+  * `in` を用いることで特敵のプロパティを持つかも判定できる
+* アロー関数でオブジェクトを返しつつ `return` を省略するときは `()` で括る
