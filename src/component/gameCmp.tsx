@@ -1,9 +1,11 @@
 import React from 'react';
 import calculateWinner from 'lib/rule';
 import '../sass/game.scss';
-import { useState } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import gameSelector from 'selector/gameSelector';
+import gameState from 'atom/gameAtom';
 
-const Square = (props: {
+const SquareCmp = (props: {
   // onClick: () => void も可
   value?: string;
   onClick: React.MouseEventHandler;
@@ -15,12 +17,12 @@ const Square = (props: {
   );
 };
 
-const Board = (props: {
+const BoardCmp = (props: {
   squares: (string | undefined)[];
   onClick: (param: number) => void;
 }): JSX.Element => {
   const renderSquare = (i: number): JSX.Element => (
-    <Square
+    <SquareCmp
       value={props.squares[i]}
       onClick={() => props.onClick(i)}
     />
@@ -47,12 +49,14 @@ const Board = (props: {
   );
 }
 
-const Game = (): JSX.Element => {
-  const [history, setHistory] = useState([{
-    squares: Array(9).fill(null),
-  }]);
-  const [stepNumber, setStepNumber] = useState(0);
-  const [xIsNext, setXIsNext] = useState(true);
+const GameCmp = (): JSX.Element => {
+  // useRecoilValue(Atom | Selector)
+  const game = useRecoilValue(gameSelector);
+  const setGame = useSetRecoilState(gameState);
+
+  const history = game.history;
+  const stepNumber = game.stepNumber;
+  const xIsNext = game.xIsNext;
 
   const handleClick = (i: number): void => {
     const real = history.slice(0, stepNumber + 1);
@@ -63,16 +67,21 @@ const Game = (): JSX.Element => {
     }
 
     squares[i] = xIsNext ? 'X' : 'O';
-    setHistory(real.concat([{
-      squares: squares,
-    }]));
-    setStepNumber(real.length);
-    setXIsNext(!xIsNext);
+    setGame({
+      history: real.concat([{
+        squares: squares,
+      }]),
+      stepNumber: real.length,
+      xIsNext: !xIsNext,
+    });
   }
 
   const jupmTo = (step: number): void => {
-    setStepNumber(step);
-    setXIsNext((step % 2) === 0);
+    setGame({
+      history: game.history,
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
   }
 
   const real = history;
@@ -100,7 +109,7 @@ const Game = (): JSX.Element => {
   return (
     <div className="game">
       <div className="game-board">
-        <Board
+        <BoardCmp
           squares={current.squares}
           onClick={(i) => handleClick(i)}
         />
@@ -113,4 +122,4 @@ const Game = (): JSX.Element => {
   );
 };
 
-export default Game;
+export default GameCmp;

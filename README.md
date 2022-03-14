@@ -27,9 +27,11 @@
 * children の型は `React.ReactNode` で定義するのがベスト
 * Hooks はループや条件分岐やネストされた関数内で呼び出してはいけない
   * トップレベルで呼び出す
+    * Recoil でも同様
   * `useState`, `useEffect` は記述した順番に処理がされる
     * スキップされたりすると呼び出しの順番が変わってしまう可能性がある
 * Custom Hooks は `use` から名前を始めるようにする
+  * コンポーネントからロジックを抽出して再利用可能な関数にした独自の Hooks のこと
 
 ## TypeScript Rule
 
