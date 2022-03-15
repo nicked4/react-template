@@ -1,26 +1,27 @@
 import React from 'react';
-import calculateWinner from 'lib/rule';
-import '../sass/game.scss';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import gameSelector from 'selector/gameSelector';
-import gameState from 'atom/gameAtom';
 
-const SquareCmp = (props: {
+import gameState from '../atom/gameAtom';
+import calculateWinner from '../lib/rule';
+import '../sass/game.scss';
+import gameSelector from '../selector/gameSelector';
+
+function SquareCmp(props: {
   // onClick: () => void も可
   value?: string;
   onClick: React.MouseEventHandler;
-}): JSX.Element => {
+}): JSX.Element {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button className="square" type="button" onClick={props.onClick}>
       {props.value}
     </button>
   );
-};
+}
 
-const BoardCmp = (props: {
+function BoardCmp(props: {
   squares: (string | undefined)[];
   onClick: (param: number) => void;
-}): JSX.Element => {
+}): JSX.Element {
   const renderSquare = (i: number): JSX.Element => (
     <SquareCmp
       value={props.squares[i]}
@@ -49,14 +50,12 @@ const BoardCmp = (props: {
   );
 }
 
-const GameCmp = (): JSX.Element => {
+function GameCmp(): JSX.Element {
   // useRecoilValue(Atom | Selector)
   const game = useRecoilValue(gameSelector);
   const setGame = useSetRecoilState(gameState);
 
-  const history = game.history;
-  const stepNumber = game.stepNumber;
-  const xIsNext = game.xIsNext;
+  const { history, stepNumber, xIsNext } = game;
 
   const handleClick = (i: number): void => {
     const real = history.slice(0, stepNumber + 1);
@@ -69,12 +68,12 @@ const GameCmp = (): JSX.Element => {
     squares[i] = xIsNext ? 'X' : 'O';
     setGame({
       history: real.concat([{
-        squares: squares,
+        squares,
       }]),
       stepNumber: real.length,
       xIsNext: !xIsNext,
     });
-  }
+  };
 
   const jupmTo = (step: number): void => {
     setGame({
@@ -82,28 +81,28 @@ const GameCmp = (): JSX.Element => {
       stepNumber: step,
       xIsNext: (step % 2) === 0,
     });
-  }
+  };
 
   const real = history;
   const current = real[stepNumber];
   const winner = calculateWinner(current.squares);
 
   const moves = real.map((_: object, move: number): JSX.Element => {
-    const desc = move ?
-      'Go to move #' + move :
-      'Go to game start';
+    const desc = move
+      ? `Go to move #${move}`
+      : 'Go to game start';
     return (
-      <li key={move}>
-        <button onClick={() => jupmTo(move)}>{desc}</button>
+      <li key={move}>  {/* eslint-disable-line */}
+        <button type="button" onClick={() => jupmTo(move)}>{desc}</button>
       </li>
     );
-  })
+  });
 
   let status: string;
   if (winner) {
-    status = 'Winner: ' + winner;
+    status = `Winner: ${winner}`;
   } else {
-    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+    status = `Next player: ${xIsNext ? 'X' : 'O'}`;
   }
 
   return (
@@ -120,6 +119,6 @@ const GameCmp = (): JSX.Element => {
       </div>
     </div>
   );
-};
+}
 
 export default GameCmp;

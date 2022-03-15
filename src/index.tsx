@@ -1,10 +1,11 @@
 import ReactDOM from 'react-dom';
-import GameCmp from 'component/gameCmp';
 import { RecoilRoot } from 'recoil';
+
+import GameCmp from './component/gameCmp';
 
 ReactDOM.render(
   <RecoilRoot>
-    <GameCmp/>
+    <GameCmp />
   </RecoilRoot>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

@@ -17,6 +17,7 @@
   * setState((state, props) => {}) を使用する
 * リスト項目には key を与える
   * key は取り囲まれる配列の要素に対して与える
+    * index のようなものを key に与えてはいけない
   * e.g.) ul > ListItem > li のような構造の場合は ListItem に対して key を与える
 * 関数型コンポーネントを利用する
   * Hooks を始めとしてこちらの方がメインストリームみたい

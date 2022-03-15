@@ -1,4 +1,4 @@
-const calculateWinner = (squares: (string | undefined)[]): string | undefined => {
+function calculateWinner(squares: (string | undefined)[]): string | undefined {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -9,13 +9,15 @@ const calculateWinner = (squares: (string | undefined)[]): string | undefined =>
     [0, 4, 8],
     [2, 4, 6],
   ];
-  for (const line of lines) {
+
+  let winner;
+  lines.forEach((line) => {
     const [a, b, c] = line;
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      winner = squares[a];
     }
-  }
-  return undefined;
-};
+  });
+  return winner;
+}
 
 export default calculateWinner;
